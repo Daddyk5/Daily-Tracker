@@ -1,18 +1,18 @@
+import { useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import AddEntryScreen from '../screens/AddEntryScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import StatsScreen from '../screens/StatsScreen';
-import { LinearGradient } from 'expo-linear-gradient';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import colors from '../theme/colors';
-import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
 import LoadingOverlay from '../components/LoadingOverlay';
+import colors from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
 
-function GradientHeader({ title }) {
+function GradientHeader({ title, rightComponent }) {
   return (
     <LinearGradient
       colors={[colors.surface, colors.surfaceAlt]}
@@ -20,7 +20,10 @@ function GradientHeader({ title }) {
       end={{ x: 1, y: 1 }}
       style={styles.header}
     >
-      <Text style={styles.headerTitle}>{title}</Text>
+      <View style={styles.headerContent}>
+        <Text style={styles.headerTitle}>{title}</Text>
+        {rightComponent && <View>{rightComponent}</View>}
+      </View>
     </LinearGradient>
   );
 }
@@ -29,12 +32,11 @@ export default function RootNavigator() {
   const [isLoading, setIsLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // ⚡ smoother loading fade animation
   const simulateLoading = () => {
     setIsLoading(true);
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 150,
+      duration: 160,
       easing: Easing.out(Easing.ease),
       useNativeDriver: true,
     }).start();
@@ -42,11 +44,11 @@ export default function RootNavigator() {
     setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 150,
+        duration: 160,
         easing: Easing.in(Easing.ease),
         useNativeDriver: true,
       }).start(() => setIsLoading(false));
-    }, 300);
+    }, 320);
   };
 
   return (
@@ -56,26 +58,14 @@ export default function RootNavigator() {
           tabPress: () => simulateLoading(),
         }}
         screenOptions={({ route }) => ({
-          tabBarStyle: {
-            backgroundColor: colors.surface,
-            borderTopColor: 'transparent',
-            height: 70,
-            position: 'absolute',
-            bottom: 10,
-            left: 15,
-            right: 15,
-            borderRadius: 20,
-            shadowColor: '#000',
-            shadowOpacity: 0.2,
-            shadowRadius: 10,
-            elevation: 8,
-          },
-          tabBarActiveTintColor: colors.accent,
-          tabBarInactiveTintColor: colors.muted,
           header: ({ options }) => <GradientHeader title={options.title || ''} />,
           sceneStyle: { backgroundColor: colors.background },
           tabBarShowLabel: false,
-          tabBarIcon: ({ focused, color, size }) => {
+          tabBarStyle: styles.tabBar,
+          tabBarActiveTintColor: colors.accent,
+          tabBarInactiveTintColor: colors.muted,
+
+          tabBarIcon: ({ focused, color }) => {
             let iconName;
 
             switch (route.name) {
@@ -95,7 +85,6 @@ export default function RootNavigator() {
                 iconName = 'ellipse';
             }
 
-            // floating center Add button
             if (route.name === 'Add') {
               return (
                 <View style={styles.fabContainer}>
@@ -106,15 +95,14 @@ export default function RootNavigator() {
                     <Ionicons
                       name="add"
                       size={32}
-                      color="white"
-                      style={{ textShadowColor: '#000', textShadowRadius: 6 }}
+                      color="#fff"
+                      style={{ textShadowColor: '#000', textShadowRadius: 8 }}
                     />
                   </LinearGradient>
                 </View>
               );
             }
 
-            // normal icons for other tabs
             return <Ionicons name={iconName} size={focused ? 28 : 24} color={color} />;
           },
         })}
@@ -125,13 +113,12 @@ export default function RootNavigator() {
         <Tab.Screen name="Stats" component={StatsScreen} options={{ title: 'Stats' }} />
       </Tab.Navigator>
 
-      {/* 🧠 Fixed loading overlay — clean fade, centered, no clipping */}
       <Animated.View
         pointerEvents={isLoading ? 'auto' : 'none'}
         style={[
           StyleSheet.absoluteFillObject,
           {
-            backgroundColor: 'rgba(0,0,0,0.25)',
+            backgroundColor: 'rgba(17, 25, 59, 0.6)',
             justifyContent: 'center',
             alignItems: 'center',
             opacity: fadeAnim,
@@ -151,10 +138,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   headerTitle: {
-    color: 'white',
+    color: colors.text,
     fontWeight: '800',
     fontSize: 18,
+  },
+  tabBar: {
+    backgroundColor: colors.surface,
+    borderTopColor: 'transparent',
+    height: 70,
+    position: 'absolute',
+    bottom: 10,
+    left: 15,
+    right: 15,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
   fabContainer: {
     position: 'absolute',
@@ -168,9 +174,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
     elevation: 10,
   },
 });
