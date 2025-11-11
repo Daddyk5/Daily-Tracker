@@ -7,8 +7,10 @@ export default function StatsScreen() {
   const { entries } = useTracker();
 
   const total = entries.length;
-  const avgMood = total ? (entries.reduce((a, e) => a + (e.mood || 0), 0) / total).toFixed(2) : '–';
-  const totalWater = entries.reduce((a, e) => a + (Number(e.water) || 0), 0);
+  const avgMood = total
+    ? (entries.reduce((a, e) => a + (e.mood || 0), 0) / total).toFixed(2)
+    : '–';
+  const totalSleep = entries.reduce((a, e) => a + (Number(e.sleep) || 0), 0);
   const totalTasks = entries.reduce((a, e) => a + (Number(e.tasks) || 0), 0);
 
   return (
@@ -17,7 +19,7 @@ export default function StatsScreen() {
         <Text style={styles.title}>Overall Stats</Text>
         <Row label="Total Entries" value={total} />
         <Row label="Average Mood" value={avgMood} />
-        <Row label="Total Water" value={totalWater} />
+        <Row label="Total Sleep" value={totalSleep} />
         <Row label="Total Tasks" value={totalTasks} />
       </LayoutCard>
     </View>
@@ -35,8 +37,15 @@ function Row({ label, value }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: 16, gap: 16 },
-  title: { color: 'white', fontSize: 18, fontWeight: '800', marginBottom: 8 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.surfaceAlt, padding: 12, borderRadius: 12, marginTop: 8 },
+  title: { color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: 8 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surfaceAlt,
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 8,
+  },
   label: { color: colors.muted },
-  value: { color: 'white', fontWeight: '800' }
+  value: { color: colors.text, fontWeight: '800' },
 });
